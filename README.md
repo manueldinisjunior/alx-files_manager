@@ -1,4 +1,3 @@
-
 # 0x04. Files manager
 
 ## Learning Objectives
@@ -14,10 +13,9 @@ The objective is to build a simple platform to upload and view files:
 * View a file
 * Generate thumbnails for images
 
-
 ## Authors
 
-- [@Adjamkwalim Akum-Yong](https://github.com/Thomasyong11)
+- [@manueldinisjunior](https://github.com/manueldinisjunior)
 
 ## Resources
 
@@ -32,10 +30,7 @@ The objective is to build a simple platform to upload and view files:
 - Mime-Types
 - Redis
 
-
-
 ## Requirements
-
 
 * Allowed editors: vi, vim, emacs, Visual Studio Code
 * All your files will be interpreted/compiled on Ubuntu 18.04 LTS using node (version 12.x.x)
@@ -43,4 +38,3 @@ The objective is to build a simple platform to upload and view files:
 * A README.md file, at the root of the folder of the project, is mandatory
 * Your code should use the js extension
 * Your code will be verified against lint using ESLint
-
