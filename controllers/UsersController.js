@@ -1,30 +1,40 @@
+/* eslint-disable import/no-named-as-default */
 import sha1 from 'sha1';
-import { ObjectId } from 'mongodb';
-import RedisClient from '../utils/redis';
+import Queue from 'bull/lib/queue';
 import dbClient from '../utils/db';
 
-export const postNew = async (req, res) => {
-  const { email, password } = req.body;
+const userQueue = new Queue('email sending');
 
-  if (!email) return res.status(400).json({ error: 'Missing email' });
-  if (!password) return res.status(400).json({ error: 'Missing password' });
+export default class UsersController {
+  static async postNew(req, res) {
+    const email = req.body ? req.body.email : null;
+    const password = req.body ? req.body.password : null;
 
-  let user = await dbClient.findUser({ email });
-  if (user) return res.status(400).json({ error: 'Already exist' });
+    if (!email) {
+      res.status(400).json({ error: 'Missing email' });
+      return;
+    }
+    if (!password) {
+      res.status(400).json({ error: 'Missing password' });
+      return;
+    }
+    const user = await (await dbClient.usersCollection()).findOne({ email });
 
-  user = await dbClient.createUser(email, sha1(password));
+    if (user) {
+      res.status(400).json({ error: 'Already exist' });
+      return;
+    }
+    const insertionInfo = await (await dbClient.usersCollection())
+      .insertOne({ email, password: sha1(password) });
+    const userId = insertionInfo.insertedId.toString();
 
-  return res.json(user);
-};
+    userQueue.add({ userId });
+    res.status(201).json({ email, id: userId });
+  }
 
-export const getMe = async (req, res) => {
-  const token = req.header('X-token');
+  static async getMe(req, res) {
+    const { user } = req;
 
-  const uid = await RedisClient.get(`auth_${token}`);
-
-  if (!uid) return res.status(401).json({ error: 'Unauthorized' });
-
-  const user = await dbClient.findUser({ _id: ObjectId(uid) });
-
-  return res.json({ email: user.email, id: user._id });
-};
+    res.status(200).json({ email: user.email, id: user._id.toString() });
+  }
+}
